@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Play, Pause, Clock, Trash2, ChevronRight, CheckCircle, AlertCircle, X, Loader2, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import CustomDropdown from '../components/CustomDropdown';
 import ConfirmModal from '../components/ConfirmModal';
 
 export default function DripCampaigns() {
@@ -157,26 +158,27 @@ export default function DripCampaigns() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">Target List</label>
-                            <select
-                                className="w-full bg-gray-900/60 border border-gray-700 rounded-xl px-4 py-3.5 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+
+                        <div>
+                            <CustomDropdown
+                                label="Target List"
+                                options={lists.map(l => ({ value: l.id, label: l.name }))}
                                 value={newCampaign.list_id}
-                                onChange={e => setNewCampaign({ ...newCampaign, list_id: e.target.value })}
-                            >
-                                <option value="">Select List</option>
-                                {lists.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
-                            </select>
+                                onChange={val => setNewCampaign({ ...newCampaign, list_id: val })}
+                                placeholder="Select List"
+                            />
+                        </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">Sending Account</label>
-                            <select
-                                className="w-full bg-gray-900/60 border border-gray-700 rounded-xl px-4 py-3.5 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                        <div>
+                            <CustomDropdown
+                                label="Sending Account"
+                                options={accounts.map(a => ({ value: a.id, label: a.phone_number }))}
                                 value={newCampaign.account_id}
-                                onChange={e => setNewCampaign({ ...newCampaign, account_id: e.target.value })}
-                            >
-                                <option value="">Select Account</option>
-                                {accounts.map(a => <option key={a.id} value={a.id}>{a.phone_number}</option>)}
-                            </select>
+                                onChange={val => setNewCampaign({ ...newCampaign, account_id: val })}
+                                placeholder="Select Account"
+                            />
+                        </div>
                         </div>
                     </div>
 
@@ -226,15 +228,13 @@ export default function DripCampaigns() {
 
                         <div className="flex flex-col md:flex-row items-end gap-4 p-5 bg-gray-800/50 rounded-xl border border-gray-700/50">
                             <div className="flex-1 w-full">
-                                <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1 uppercase tracking-wider">Message Template</label>
-                                <select
-                                    className="w-full bg-gray-900/80 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                                <CustomDropdown
+                                    label="Message Template"
+                                    options={templates.map(t => ({ value: t.id, label: t.name }))}
                                     value={newStep.template_id}
-                                    onChange={e => setNewStep({ ...newStep, template_id: e.target.value })}
-                                >
-                                    <option value="">Select Template</option>
-                                    {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                                </select>
+                                    onChange={val => setNewStep({ ...newStep, template_id: val })}
+                                    placeholder="Select Template"
+                                />
                             </div>
                             <div className="w-full md:w-48">
                                 <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1 uppercase tracking-wider">Delay (minutes)</label>

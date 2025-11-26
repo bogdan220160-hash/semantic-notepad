@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Play, Pause, Square, Activity, CheckCircle, AlertCircle, XCircle, Trash2, StopCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import CustomDropdown from '../components/CustomDropdown';
 import ConfirmModal from '../components/ConfirmModal';
 
 export default function CampaignControl() {
@@ -225,15 +226,16 @@ export default function CampaignControl() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">{t('targetList')}</label>
-                            <select
-                                className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+
+                        <div>
+                            <CustomDropdown
+                                label={t('targetList')}
+                                options={lists.map(l => ({ value: l.id, label: `${l.name} (${l.count} ${t('users')})` }))}
                                 value={formData.list_id}
-                                onChange={e => setFormData({ ...formData, list_id: e.target.value })}
-                            >
-                                <option value="">{t('selectList')}</option>
-                                {lists.map(l => <option key={l.id} value={l.id}>{l.name} ({l.count} {t('users')})</option>)}
-                            </select>
+                                onChange={val => setFormData({ ...formData, list_id: val })}
+                                placeholder={t('selectList')}
+                            />
+                        </div>
                         </div>
 
                         <div>
@@ -258,29 +260,21 @@ export default function CampaignControl() {
                             </div>
 
                             {mode === 'template' && (
-                                <select
-                                    className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                <CustomDropdown
+                                    options={templates.map(t => ({ value: t.id, label: t.name }))}
                                     value={formData.template_id}
-                                    onChange={e => setFormData({ ...formData, template_id: e.target.value })}
-                                >
-                                    <option value="">{t('selectTemplate')}</option>
-                                    {templates.map(t => (
-                                        <option key={t.id} value={t.id}>{t.name}</option>
-                                    ))}
-                                </select>
+                                    onChange={val => setFormData({ ...formData, template_id: val })}
+                                    placeholder={t('selectTemplate')}
+                                />
                             )}
 
                             {mode === 'ab_test' && (
-                                <select
-                                    className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                <CustomDropdown
+                                    options={abTests.map(t => ({ value: t.id, label: t.name }))}
                                     value={formData.ab_test_id}
-                                    onChange={e => setFormData({ ...formData, ab_test_id: e.target.value })}
-                                >
-                                    <option value="">{t('selectAbTest')}</option>
-                                    {abTests.map(t => (
-                                        <option key={t.id} value={t.id}>{t.name}</option>
-                                    ))}
-                                </select>
+                                    onChange={val => setFormData({ ...formData, ab_test_id: val })}
+                                    placeholder={t('selectAbTest')}
+                                />
                             )}
 
                             {mode === 'rotation' && (

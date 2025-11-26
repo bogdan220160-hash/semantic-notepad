@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Trash2, BarChart2, Play, StopCircle, Loader2, FlaskConical, X, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import CustomDropdown from '../components/CustomDropdown';
 import ConfirmModal from '../components/ConfirmModal';
 
 export default function ABTest() {
@@ -144,17 +145,13 @@ export default function ABTest() {
                                         <div key={index} className="flex gap-4 items-end bg-gray-800/50 p-4 rounded-xl border border-gray-700/50 hover:border-blue-500/30 transition-colors">
                                             <div className="flex-1">
                                                 <label className="text-xs text-gray-500 mb-1 block uppercase tracking-wider">Template</label>
-                                                <select
-                                                    required
-                                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2.5 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+
+                                                <CustomDropdown
+                                                    options={templates.map(t => ({ value: t.id, label: t.name }))}
                                                     value={variant.template_id}
-                                                    onChange={e => handleVariantChange(index, 'template_id', parseInt(e.target.value))}
-                                                >
-                                                    <option value="">Select Template</option>
-                                                    {templates.map(t => (
-                                                        <option key={t.id} value={t.id}>{t.name}</option>
-                                                    ))}
-                                                </select>
+                                                    onChange={val => handleVariantChange(index, 'template_id', parseInt(val))}
+                                                    placeholder="Select Template"
+                                                />
                                             </div>
                                             <div className="w-24">
                                                 <label className="text-xs text-gray-500 mb-1 block uppercase tracking-wider">Weight %</label>

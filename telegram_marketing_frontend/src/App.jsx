@@ -63,7 +63,7 @@ function Layout({ children }) {
         <div className="p-6 border-b border-gray-700/50">
           <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 flex items-center space-x-3">
             <Activity className="text-blue-500" />
-            <span>TG Marketing</span>
+            <span>TG MessageGrid</span>
           </h1>
         </div>
 
