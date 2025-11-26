@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Trash2, BarChart2, Play, StopCircle, Loader2, FlaskConical, X, CheckCircle, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, BarChart2, Play, StopCircle, Loader2, FlaskConical, X, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import ConfirmModal from '../components/ConfirmModal';
 

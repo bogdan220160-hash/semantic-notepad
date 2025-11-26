@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.future import select
 from pydantic import BaseModel
 from typing import Optional
@@ -77,6 +78,14 @@ async def delete_template(template_id: int, db: AsyncSession = Depends(get_db)):
     if not template:
         raise HTTPException(status_code=404, detail="Template not found")
     
-    await db.delete(template)
-    await db.commit()
+    try:
+        await db.delete(template)
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot delete template because it is being used in a campaign or A/B test."
+        )
+    
     return {"status": "deleted", "template_id": template_id}
