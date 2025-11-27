@@ -113,9 +113,9 @@ export default function Inbox() {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-                        {t('unifiedInbox') || "Unified Inbox"}
+                        {t('unifiedInbox')}
                     </h2>
-                    <p className="text-gray-400 text-sm mt-1">Manage all your conversations in one place</p>
+                    <p className="text-gray-400 text-sm mt-1">{t('inboxDescription')}</p>
                 </div>
                 
                 <div className="flex items-center space-x-4 bg-gray-800/50 p-1.5 rounded-2xl border border-gray-700/50 backdrop-blur-sm">
@@ -128,13 +128,14 @@ export default function Inbox() {
                             setSelectedDialog(null);
                             setMessages([]);
                         }}
+
                         className="min-w-[200px]"
-                        placeholder="Select Account"
+                        placeholder={t('selectAccount') || "Select Account"}
                     />
                     <button
                         onClick={fetchDialogs}
                         className="p-2 bg-gray-700/50 hover:bg-gray-700 text-gray-300 hover:text-white rounded-xl transition-colors"
-                        title="Refresh Chats"
+                        title={t('refreshChats')}
                     >
                         <RefreshCw size={18} className={loadingDialogs ? "animate-spin" : ""} />
                     </button>
@@ -160,7 +161,7 @@ export default function Inbox() {
                             <Search className="absolute left-3 top-2.5 text-gray-500" size={18} />
                             <input 
                                 type="text" 
-                                placeholder="Search chats..." 
+                                placeholder={t('searchChats')} 
                                 className="w-full bg-gray-900/50 border border-gray-700/50 rounded-xl pl-10 pr-4 py-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
                             />
                         </div>
@@ -169,12 +170,12 @@ export default function Inbox() {
                         {loadingDialogs ? (
                             <div className="flex flex-col justify-center items-center h-40 text-gray-500">
                                 <Loader2 className="animate-spin mb-2 text-blue-500" /> 
-                                <span className="text-sm">Loading chats...</span>
+                                <span className="text-sm">{t('loadingChats')}</span>
                             </div>
                         ) : dialogs.length === 0 ? (
                             <div className="p-8 text-center text-gray-500">
                                 <MessageSquare size={40} className="mx-auto mb-3 opacity-20" />
-                                <p>No chats found</p>
+                                <p>{t('noChatsFound')}</p>
                             </div>
                         ) : (
                             <div className="space-y-1 p-2">
@@ -199,7 +200,7 @@ export default function Inbox() {
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex justify-between items-baseline mb-0.5">
                                                     <span className={`font-semibold truncate pr-2 ${selectedDialog?.id === dialog.id ? 'text-blue-100' : 'text-gray-200'}`}>
-                                                        {dialog.name || 'Unknown'}
+                                                        {dialog.name || t('unknown')}
                                                     </span>
                                                     {dialog.date && (
                                                         <span className="text-[10px] text-gray-500">
@@ -209,7 +210,7 @@ export default function Inbox() {
                                                 </div>
                                                 <div className="flex justify-between items-center">
                                                     <p className={`text-sm truncate ${selectedDialog?.id === dialog.id ? 'text-blue-200/70' : 'text-gray-500 group-hover:text-gray-400'}`}>
-                                                        {dialog.last_message || 'No messages'}
+                                                        {dialog.last_message || t('noMessages')}
                                                     </p>
                                                     {dialog.unread_count > 0 && (
                                                         <span className="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-lg shadow-blue-500/30 ml-2">
@@ -240,7 +241,7 @@ export default function Inbox() {
                                         <h3 className="font-bold text-gray-100 text-lg">{selectedDialog.name}</h3>
                                         <div className="flex items-center text-xs text-green-400">
                                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
-                                            Online
+                                            {t('online')}
                                         </div>
                                     </div>
                                 </div>
@@ -286,7 +287,7 @@ export default function Inbox() {
                                 <form onSubmit={handleSendMessage} className="flex items-end space-x-3 bg-gray-900/50 p-2 rounded-2xl border border-gray-700/50 focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/20 transition-all">
                                     <input
                                         type="text"
-                                        placeholder="Type a message..."
+                                        placeholder={t('typeMessage')}
                                         className="flex-1 bg-transparent border-none px-4 py-3 text-gray-100 focus:outline-none placeholder-gray-500 min-h-[50px]"
                                         value={newMessage}
                                         onChange={e => setNewMessage(e.target.value)}
@@ -306,8 +307,8 @@ export default function Inbox() {
                             <div className="w-24 h-24 bg-gray-800 rounded-full flex items-center justify-center mb-6 shadow-xl border border-gray-700/50">
                                 <MessageSquare size={40} className="text-gray-600" />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-300 mb-2">Select a chat</h3>
-                            <p className="text-gray-500 max-w-xs text-center">Choose a conversation from the sidebar to start messaging</p>
+                            <h3 className="text-2xl font-bold text-gray-300 mb-2">{t('selectChat')}</h3>
+                            <p className="text-gray-500 max-w-xs text-center">{t('selectChatDesc')}</p>
                         </div>
                     )}
                 </div>

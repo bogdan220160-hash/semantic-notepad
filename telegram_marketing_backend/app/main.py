@@ -20,6 +20,11 @@ async def lifespan(app: FastAPI):
     
     # Start scheduler loop in background
     asyncio.create_task(scheduler_loop())
+
+    # Start event consumer (worker) in background
+    from .events.consumer import EventConsumer
+    consumer = EventConsumer()
+    asyncio.create_task(consumer.start())
     
     yield
     # Shutdown

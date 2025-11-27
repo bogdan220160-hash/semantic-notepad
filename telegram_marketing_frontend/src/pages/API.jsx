@@ -224,7 +224,7 @@ export default function API() {
                                 <li className="bg-gray-900/30 p-4 rounded-xl border border-gray-700/30 hover:border-gray-600/50 transition-colors">
                                     <div className="flex items-center mb-2">
                                         <span className="bg-green-500/10 text-green-400 px-2.5 py-1 rounded-md text-xs font-bold font-mono mr-3 border border-green-500/20">POST</span>
-                                        <code className="text-gray-200 font-mono text-sm">/campaign/start</code>
+                                        <code className="text-gray-200 font-mono text-sm">/campaigns/start</code>
                                     </div>
                                     <p className="text-gray-400 text-xs leading-relaxed">{t('endpointStartCampaignDesc')}</p>
                                 </li>

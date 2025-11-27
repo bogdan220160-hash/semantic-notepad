@@ -78,7 +78,7 @@ export default function CampaignControl() {
 
     const fetchCampaigns = async () => {
         try {
-            const res = await axios.get('http://localhost:8000/campaign/');
+            const res = await axios.get('http://localhost:8000/campaigns/');
             setCampaigns(res.data);
         } catch (err) {
             console.error("Failed to fetch campaigns", err);
@@ -173,7 +173,7 @@ export default function CampaignControl() {
     const confirmDelete = async () => {
         if (!deleteModal) return;
         try {
-            await axios.delete(`http://localhost:8000/campaign/${deleteModal}`);
+            await axios.delete(`http://localhost:8000/campaigns/${deleteModal}`);
             fetchCampaigns();
         } catch (err) {
             setErrorModal({ message: t('failedToDeleteCampaign') || "Failed to delete campaign" });
@@ -403,14 +403,22 @@ export default function CampaignControl() {
                                     type="checkbox"
                                     className="mr-2 rounded text-blue-500 bg-gray-800 border-gray-600 focus:ring-blue-500 w-4 h-4"
                                     checked={!!formData.scheduled_for}
-                                    onChange={e => setFormData({ ...formData, scheduled_for: e.target.checked ? new Date().toISOString().slice(0, 16) : '' })}
+                                    onChange={e => {
+                                        if (e.target.checked) {
+                                            const now = new Date();
+                                            const localIso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+                                            setFormData({ ...formData, scheduled_for: localIso });
+                                        } else {
+                                            setFormData({ ...formData, scheduled_for: '' });
+                                        }
+                                    }}
                                 />
                                 <span className="font-medium">{t('scheduleForLater')}</span>
                             </label>
 
                             {formData.scheduled_for && (
                                 <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <label className="block text-sm font-medium text-gray-400 mb-1">{t('startTimeUtc')}</label>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">{t('startTimeLocal') || "Start Time (Local)"}</label>
                                     <input
                                         type="datetime-local"
                                         className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
@@ -418,10 +426,6 @@ export default function CampaignControl() {
                                         onChange={e => setFormData({ ...formData, scheduled_for: e.target.value })}
                                         style={{ colorScheme: 'dark' }}
                                     />
-                                    <p className="text-xs text-gray-500 mt-1 flex items-center">
-                                        <Activity size={12} className="mr-1" />
-                                        {t('serverTimeUtc')}
-                                    </p>
                                 </div>
                             )}
                         </div>
@@ -520,7 +524,12 @@ export default function CampaignControl() {
                                 </div>
                                 
                                 <div className="mt-4 text-xs text-gray-500 flex justify-between items-center">
-                                    <span>{t('started')}: {new Date(campaign.created_at).toLocaleString()}</span>
+                                    <span>{t('started')}: {(() => {
+                                        const dateStr = campaign.created_at;
+                                        if (!dateStr) return '';
+                                        const date = new Date(dateStr.endsWith('Z') ? dateStr : dateStr + 'Z');
+                                        return date.toLocaleString();
+                                    })()}</span>
                                     <span className="font-mono opacity-50">ID: {campaign.id}</span>
                                 </div>
                             </div>
@@ -654,20 +663,40 @@ export default function CampaignControl() {
 }
 
 function MessagePreview({ formData, templates, mode }) {
-    // Determine which template to show
-    let activeTemplate = null;
+    const [currentIndex, setCurrentIndex] = useState(0);
+    
+    // Determine which templates to show
+    let activeTemplates = [];
 
     if (mode === 'template' && formData.template_id) {
-        activeTemplate = templates.find(t => t.id == formData.template_id);
-    } else if (mode === 'rotation' && formData.rotation_steps.length > 0 && formData.rotation_steps[0].template_id) {
-        // Show first step template
-        activeTemplate = templates.find(t => t.id == formData.rotation_steps[0].template_id);
+        const t = templates.find(t => t.id == formData.template_id);
+        if (t) activeTemplates = [t];
+    } else if (mode === 'rotation' && formData.rotation_steps.length > 0) {
+        activeTemplates = formData.rotation_steps
+            .map(step => templates.find(t => t.id == step.template_id))
+            .filter(Boolean);
     } else if (mode === 'auto_rotation' && formData.auto_rotation_config.template_ids.length > 0) {
-        // Show first selected template
-        activeTemplate = templates.find(t => t.id == formData.auto_rotation_config.template_ids[0]);
+        activeTemplates = formData.auto_rotation_config.template_ids
+            .map(id => templates.find(t => t.id == id))
+            .filter(Boolean);
+    } else if (mode === 'ab_test' && formData.ab_test_id) {
+         // Ideally we would fetch the A/B test variants here, but we might not have them easily accessible 
+         // without fetching the specific AB test details. 
+         // For now, we'll just show a placeholder or if we had the variants in the parent state we could use them.
+         // Assuming we don't have variants readily available in the props, we might skip or show a generic message.
+         // However, if the user selects an AB test, we usually want to see its variants.
+         // Given the current props, we can't easily show AB test variants unless we fetch them or pass them down.
+         // Let's stick to the other modes for now which are the primary issue.
     }
 
-    if (!activeTemplate) {
+    // Reset index if it goes out of bounds
+    useEffect(() => {
+        if (currentIndex >= activeTemplates.length) {
+            setCurrentIndex(0);
+        }
+    }, [activeTemplates.length]);
+
+    if (activeTemplates.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-64 text-gray-500 bg-gray-900/30 rounded-xl border border-gray-700/30 border-dashed">
                 <p className="text-sm">Select a template to preview</p>
@@ -675,17 +704,38 @@ function MessagePreview({ formData, templates, mode }) {
         );
     }
 
+    const activeTemplate = activeTemplates[currentIndex];
+
     return (
         <div className="bg-[#0e1621] rounded-xl overflow-hidden border border-gray-800 shadow-2xl">
             {/* Telegram Header Mockup */}
-            <div className="bg-[#17212b] p-3 flex items-center border-b border-gray-800">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-xs">
-                    TG
+            <div className="bg-[#17212b] p-3 flex items-center border-b border-gray-800 justify-between">
+                <div className="flex items-center">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-xs">
+                        TG
+                    </div>
+                    <div className="ml-3">
+                        <p className="text-gray-100 text-sm font-medium">Recipient Name</p>
+                        <p className="text-blue-400 text-xs">online</p>
+                    </div>
                 </div>
-                <div className="ml-3">
-                    <p className="text-gray-100 text-sm font-medium">Recipient Name</p>
-                    <p className="text-blue-400 text-xs">online</p>
-                </div>
+                {activeTemplates.length > 1 && (
+                    <div className="flex items-center space-x-2">
+                        <button 
+                            onClick={() => setCurrentIndex(prev => (prev - 1 + activeTemplates.length) % activeTemplates.length)}
+                            className="text-gray-400 hover:text-white transition-colors"
+                        >
+                            &lt;
+                        </button>
+                        <span className="text-xs text-gray-500">{currentIndex + 1}/{activeTemplates.length}</span>
+                        <button 
+                            onClick={() => setCurrentIndex(prev => (prev + 1) % activeTemplates.length)}
+                            className="text-gray-400 hover:text-white transition-colors"
+                        >
+                            &gt;
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Message Area */}
@@ -693,7 +743,7 @@ function MessagePreview({ formData, templates, mode }) {
                 <div className="absolute inset-0 bg-[#0e1621]/80 backdrop-blur-[1px]"></div>
 
                 <div className="relative z-10 flex flex-col space-y-2">
-                    <div className="self-start bg-[#182533] text-white p-3 rounded-tr-xl rounded-br-xl rounded-bl-xl max-w-[85%] shadow-sm border border-gray-800/50">
+                    <div className="self-start bg-[#182533] text-white p-3 rounded-tr-xl rounded-br-xl rounded-bl-xl max-w-[85%] shadow-sm border border-gray-800/50 animate-in fade-in slide-in-from-left-2 duration-200" key={activeTemplate.id}>
                         {activeTemplate.media_url && (
                             <div className="mb-2 rounded-lg overflow-hidden">
                                 <img src={activeTemplate.media_url} alt="Media" className="w-full h-auto object-cover" onError={(e) => e.target.style.display = 'none'} />

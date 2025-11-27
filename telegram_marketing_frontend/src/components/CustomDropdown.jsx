@@ -1,18 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Check } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function CustomDropdown({ 
     options, 
     value, 
     onChange, 
-    placeholder = "Select an option", 
+    placeholder, 
     label, 
     icon: Icon,
     disabled = false,
     className = ""
 }) {
+    const { t } = useLanguage();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
+
+    // Default placeholder if not provided
+    const displayPlaceholder = placeholder || t('selectOption');
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -31,7 +36,7 @@ export default function CustomDropdown({
     const selectedOption = options.find(opt => opt.value === value);
 
     return (
-        <div className={`relative ${className}`} ref={dropdownRef}>
+        <div className={`relative w-full ${className}`} ref={dropdownRef}>
             {label && (
                 <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">
                     {label}
@@ -41,18 +46,21 @@ export default function CustomDropdown({
                 type="button"
                 onClick={() => !disabled && setIsOpen(!isOpen)}
                 disabled={disabled}
-                className={`w-full bg-gray-900/60 border border-gray-700 rounded-xl px-4 py-3.5 text-left focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all flex justify-between items-center group ${
-                    disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-800/80 cursor-pointer'
-                }`}
+                className={`w-full bg-gray-800/40 border border-gray-700/50 backdrop-blur-sm rounded-xl py-3.5 text-left text-base focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all flex justify-between items-center group ${
+                    disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-800/60 cursor-pointer'
+                } ${Icon ? 'pl-12 pr-4' : 'px-4'}`}
             >
-                <div className="flex items-center truncate">
-                    {Icon && <Icon size={18} className="mr-2 text-gray-400 group-hover:text-blue-400 transition-colors" />}
-                    <span className={`truncate ${selectedOption ? 'text-gray-100' : 'text-gray-500'}`}>
-                        {selectedOption ? selectedOption.label : placeholder}
-                    </span>
-                </div>
+                {Icon && (
+                    <Icon 
+                        size={20} 
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 group-hover:text-blue-400 transition-colors" 
+                    />
+                )}
+                <span className={`truncate ${selectedOption ? 'text-gray-100' : 'text-gray-500'}`}>
+                    {selectedOption ? selectedOption.label : displayPlaceholder}
+                </span>
                 <ChevronDown 
-                    className={`text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
+                    className={`text-gray-400 transition-transform duration-300 flex-shrink-0 ml-2 ${isOpen ? 'rotate-180' : ''}`} 
                     size={20} 
                 />
             </button>
@@ -82,7 +90,7 @@ export default function CustomDropdown({
                         ))}
                         {options.length === 0 && (
                             <div className="px-4 py-3 text-gray-500 text-center text-sm">
-                                No options available
+                                {t('noOptions')}
                             </div>
                         )}
                     </div>

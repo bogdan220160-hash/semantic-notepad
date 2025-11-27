@@ -49,30 +49,32 @@ class EventConsumer:
             account_ids = data.get("account_ids")
             delay = data.get("delay", 1.0)
             variables = data.get("variables", {})
-
-            # 1. Select an account (Round-robin or random - simple random for now)
-            import random
-            account_id = random.choice(account_ids)
             
-            # 2. Get Template
-            result = await db.execute(select(MessageTemplate).where(MessageTemplate.id == template_id))
-            template = result.scalars().first()
-            if not template:
-                print(f"Template {template_id} not found")
-                return
-
-            # 3. Prepare content
-            content = template.content
-            # Simple variable substitution
-            for key, value in variables.items():
-                if isinstance(value, str):
-                    content = content.replace(f"{{{key}}}", value)
-            
-            # 4. Send Message
             status = "failed"
-            error_message = None
-            
+            error_message = "Unknown error"
+            account_id = None
+
             try:
+                # 1. Select an account
+                if not account_ids:
+                    raise ValueError("No account_ids provided in task")
+                
+                import random
+                account_id = random.choice(account_ids)
+                
+                # 2. Get Template
+                result = await db.execute(select(MessageTemplate).where(MessageTemplate.id == template_id))
+                template = result.scalars().first()
+                if not template:
+                    raise ValueError(f"Template {template_id} not found")
+
+                # 3. Prepare content
+                content = template.content
+                for key, value in variables.items():
+                    if isinstance(value, str):
+                        content = content.replace(f"{{{key}}}", value)
+                
+                # 4. Send Message
                 client = await self.get_client(account_id, db)
                 if client:
                     # Resolve entity first
@@ -89,8 +91,6 @@ class EventConsumer:
                         if filter_settings_json:
                             filters = json.loads(filter_settings_json)
                             
-                            # We need the full entity object to check properties
-                            # If we haven't resolved it yet (e.g. it was a phone number), we might need to get_entity now
                             if isinstance(entity, str): 
                                 try:
                                     entity_obj = await client.get_entity(entity)
@@ -105,8 +105,6 @@ class EventConsumer:
                                     if hasattr(entity_obj, 'bot') and entity_obj.bot:
                                         status = "skipped"
                                         error_message = "Filter: User is a bot"
-                                        print(f"Skipping {recipient}: User is a bot")
-                                        # Log and return early
                                         raise ValueError("Filter: User is a bot")
 
                                 # 2. Skip No Photo
@@ -114,64 +112,58 @@ class EventConsumer:
                                     if hasattr(entity_obj, 'photo') and not entity_obj.photo:
                                         status = "skipped"
                                         error_message = "Filter: User has no photo"
-                                        print(f"Skipping {recipient}: User has no photo")
                                         raise ValueError("Filter: User has no photo")
                     except ValueError as ve:
-                        # Re-raise to be caught by outer try/except as a "failed" or "skipped" log
-                        # We want to log it as skipped, so we handle it here
-                        log = SendLog(
-                            campaign_id=campaign_id,
-                            account_id=account_id,
-                            recipient=recipient,
-                            status="skipped",
-                            error_message=str(ve)
-                        )
-                        db.add(log)
-                        await db.commit()
-                        return # Stop processing this message
-
+                        # Re-raise to be caught by outer try/except
+                        raise ve
                     except Exception as e:
                         print(f"Error checking filters: {e}")
-                        # Continue if filter check fails? Or fail safe? Let's continue.
                     
                     # --- END FILTERS ---
 
                     # Send
                     await client.send_message(entity, content)
                     status = "sent"
+                    error_message = None
                     print(f"Sent to {recipient} via account {account_id}")
                 else:
                     error_message = f"Could not initialize client for account {account_id}"
-                    print(error_message)
+                    raise ValueError(error_message)
             
             except errors.FloodWaitError as e:
-                # Handle Rate Limit
                 wait_time = e.seconds
                 error_message = f"FloodWait: Need to wait {wait_time}s"
                 print(f"Rate limit hit. Waiting {wait_time}s...")
                 await asyncio.sleep(wait_time)
-                # Retry once (optional, or just log as failed/skipped)
                 status = "skipped" 
 
             except errors.RPCError as e:
-                # Handle specific Telegram errors (like Privacy)
-                error_message = f"RPCError {e.code}: {e.message} (caused by {e.request.__class__.__name__})"
+                error_message = f"RPCError {e.code}: {e.message}"
                 print(f"Telegram Error: {error_message}")
 
+            except ValueError as ve:
+                # Handled errors (filters, missing data)
+                error_message = str(ve)
+                if status == "failed": # If not already set to skipped
+                     pass # keep failed
+            
             except Exception as e:
                 error_message = str(e)
                 print(f"Failed to send to {recipient}: {e}")
                 
             # 5. Log result
-            log = SendLog(
-                campaign_id=campaign_id,
-                account_id=account_id,
-                recipient=recipient,
-                status=status,
-                error_message=error_message
-            )
-            db.add(log)
-            await db.commit()
+            try:
+                log = SendLog(
+                    campaign_id=campaign_id,
+                    account_id=account_id,
+                    recipient=recipient,
+                    status=status,
+                    error_message=error_message
+                )
+                db.add(log)
+                await db.commit()
+            except Exception as log_error:
+                print(f"Failed to save log: {log_error}")
             
             # 6. Delay
             # Fetch global delay settings from Redis

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func, case
 from datetime import datetime, timedelta
-from ..models import SendLog
+from ..models import SendLog, ScraperLog
 from ..database import get_db
 
 router = APIRouter(
@@ -92,3 +92,64 @@ async def ab_test_results():
     """Return results of A/B tests (conversion rates, clicks, etc.)."""
     # Placeholder for A/B test logic
     return {"tests": []}
+
+@router.get("/scraping")
+async def scraping_stats(db: AsyncSession = Depends(get_db)):
+    """Return scraping statistics."""
+    
+    # Total users scraped
+    result_users = await db.execute(select(func.sum(ScraperLog.users_scraped)))
+    total_users = result_users.scalar() or 0
+    
+    # Total channels/groups scraped (unique sources)
+    result_channels = await db.execute(select(func.count(func.distinct(ScraperLog.source_url))))
+    total_channels = result_channels.scalar() or 0
+    
+    # Recent activity
+    result_recent = await db.execute(
+        select(ScraperLog)
+        .order_by(ScraperLog.timestamp.desc())
+        .limit(5)
+    )
+    recent_logs = result_recent.scalars().all()
+    
+    return {
+        "total_users_scraped": total_users,
+        "total_channels_scraped": total_channels,
+        "recent_activity": [
+            {
+                "source": log.source_url,
+                "count": log.users_scraped,
+                "status": log.status,
+                "date": log.timestamp.strftime("%Y-%m-%d %H:%M")
+            } for log in recent_logs
+        ]
+    }
+
+@router.get("/hourly-scraping-activity")
+async def get_hourly_scraping_activity(db: AsyncSession = Depends(get_db)):
+    """Get scraping activity (users scraped) grouped by hour for the last 24 hours."""
+    since = datetime.utcnow() - timedelta(hours=24)
+    
+    # Query logs
+    result = await db.execute(
+        select(ScraperLog.timestamp, ScraperLog.users_scraped)
+        .where(ScraperLog.timestamp >= since)
+        .where(ScraperLog.status == 'success')
+    )
+    rows = result.all()
+    
+    # Process in Python
+    hourly_counts = {}
+    for timestamp, count in rows:
+        hour_key = timestamp.strftime("%H:00")
+        hourly_counts[hour_key] = hourly_counts.get(hour_key, 0) + count
+        
+    # Ensure all hours are represented
+    final_data = []
+    for i in range(24):
+        hour = (datetime.utcnow() - timedelta(hours=i)).strftime("%H:00")
+        final_data.append({"hour": hour, "count": hourly_counts.get(hour, 0)})
+        
+    final_data.reverse() # Chronological order
+    return final_data

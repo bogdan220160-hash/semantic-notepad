@@ -52,7 +52,7 @@ export default function Delay() {
                         <div className="mb-8 p-4 bg-blue-900/20 text-blue-200 border border-blue-700/50 rounded-xl flex items-start space-x-3">
                             <Zap className="flex-shrink-0 text-blue-400" size={24} />
                             <div>
-                                <h3 className="font-semibold text-blue-100 mb-1">Optimize Sending Speed</h3>
+                                <h3 className="font-semibold text-blue-100 mb-1">{t('optimizeSendingSpeed')}</h3>
                                 <p className="text-sm text-blue-200/80 leading-relaxed">{t('delayDescription')}</p>
                             </div>
                         </div>
@@ -73,7 +73,7 @@ export default function Delay() {
                                             <Clock size={24} />
                                         </div>
                                         <span className="font-bold text-lg">{t('fixedDelay')}</span>
-                                        <span className="text-xs mt-2 opacity-70">Constant wait time</span>
+                                        <span className="text-xs mt-2 opacity-70">{t('constantWaitTime')}</span>
                                         {settings.type === 'fixed' && (
                                             <div className="absolute top-3 right-3 text-blue-500">
                                                 <CheckCircle size={20} />
@@ -93,7 +93,7 @@ export default function Delay() {
                                             <Shuffle size={24} />
                                         </div>
                                         <span className="font-bold text-lg">{t('randomDelay')}</span>
-                                        <span className="text-xs mt-2 opacity-70">Variable wait time</span>
+                                        <span className="text-xs mt-2 opacity-70">{t('variableWaitTime')}</span>
                                         {settings.type === 'random' && (
                                             <div className="absolute top-3 right-3 text-purple-500">
                                                 <CheckCircle size={20} />
@@ -183,12 +183,12 @@ export default function Delay() {
                 {/* Info Panel */}
                 <div className="lg:col-span-1">
                     <div className="bg-gray-800/30 backdrop-blur-sm p-6 rounded-2xl border border-gray-700/30 sticky top-6">
-                        <h3 className="text-lg font-semibold text-gray-200 mb-4">Pro Tips</h3>
+                        <h3 className="text-lg font-semibold text-gray-200 mb-4">{t('proTips')}</h3>
                         <div className="space-y-4">
                             <div className="bg-blue-500/5 border border-blue-500/10 p-4 rounded-xl">
-                                <h4 className="text-blue-400 font-medium mb-1 text-sm">Avoid Bans</h4>
+                                <h4 className="text-blue-400 font-medium mb-1 text-sm">{t('avoidBans')}</h4>
                                 <p className="text-xs text-gray-400 leading-relaxed">
-                                    Using a random delay (e.g., 2-5 seconds) makes your behavior look more human-like to Telegram's algorithms.
+                                    {t('avoidBansDesc')}
                                 </p>
                             </div>
                             
@@ -213,7 +213,7 @@ export default function Delay() {
                             </div>
 
                             <h3 className="text-xl font-bold text-white">
-                                {showModal.type === 'success' ? 'Success!' : 'Error'}
+                                {showModal.type === 'success' ? t('success') : t('error')}
                             </h3>
 
                             <p className="text-gray-300">
@@ -224,7 +224,7 @@ export default function Delay() {
                                 onClick={() => setShowModal(null)}
                                 className="mt-4 w-full bg-gray-800 hover:bg-gray-700 text-white font-medium py-2.5 rounded-xl transition-colors border border-gray-700"
                             >
-                                Close
+                                {t('close')}
                             </button>
                         </div>
                     </div>

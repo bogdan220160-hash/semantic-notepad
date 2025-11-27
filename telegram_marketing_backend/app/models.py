@@ -123,3 +123,12 @@ class WarmupLog(Base):
     action = Column(String, nullable=False) # read, join, scroll
     details = Column(String, nullable=True) # e.g. "Joined channel @durov"
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+class ScraperLog(Base):
+    __tablename__ = "scraper_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    source_url = Column(String, nullable=False) # Group/Channel URL or ID
+    users_scraped = Column(Integer, default=0)
+    status = Column(String, default="success") # success, failed
+    error_message = Column(Text, nullable=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)

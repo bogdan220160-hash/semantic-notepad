@@ -101,14 +101,14 @@ export default function ABTest() {
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 flex items-center">
                     <FlaskConical className="mr-3 text-blue-500" />
-                    {t('abTesting') || "A/B Testing"}
+                    {t('abTesting')}
                 </h2>
                 <button
                     onClick={() => setShowCreate(true)}
                     className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-6 py-3 rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/20 transform hover:-translate-y-0.5 font-medium"
                 >
                     <Plus size={20} />
-                    <span>{t('newTest') || "New Test"}</span>
+                    <span>{t('newTest')}</span>
                 </button>
             </div>
 
@@ -118,7 +118,7 @@ export default function ABTest() {
                     <div className="bg-gray-900 rounded-2xl p-8 w-full max-w-2xl border border-gray-700 shadow-2xl transform scale-100 transition-all" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-                                {t('createTest') || "Create A/B Test"}
+                                {t('createTest')}
                             </h3>
                             <button onClick={() => setShowCreate(false)} className="text-gray-400 hover:text-white transition-colors">
                                 <X size={24} />
@@ -127,7 +127,7 @@ export default function ABTest() {
                         
                         <form onSubmit={handleCreate} className="space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-2">{t('testName') || "Test Name"}</label>
+                                <label className="block text-sm font-medium text-gray-400 mb-2">{t('testName')}</label>
                                 <input
                                     type="text"
                                     required
@@ -139,7 +139,7 @@ export default function ABTest() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-4">{t('variants') || "Variants"}</label>
+                                <label className="block text-sm font-medium text-gray-400 mb-4">{t('variants')}</label>
                                 <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                     {newTest.variants.map((variant, index) => (
                                         <div key={index} className="flex gap-4 items-end bg-gray-800/50 p-4 rounded-xl border border-gray-700/50 hover:border-blue-500/30 transition-colors">
@@ -150,11 +150,11 @@ export default function ABTest() {
                                                     options={templates.map(t => ({ value: t.id, label: t.name }))}
                                                     value={variant.template_id}
                                                     onChange={val => handleVariantChange(index, 'template_id', parseInt(val))}
-                                                    placeholder="Select Template"
+                                                    placeholder={t('selectTemplate')}
                                                 />
                                             </div>
                                             <div className="w-24">
-                                                <label className="text-xs text-gray-500 mb-1 block uppercase tracking-wider">Weight %</label>
+                                                <label className="text-xs text-gray-500 mb-1 block uppercase tracking-wider">{t('weight')}</label>
                                                 <input
                                                     type="number"
                                                     required
@@ -183,7 +183,7 @@ export default function ABTest() {
                                     className="w-full py-3 mt-3 border-2 border-dashed border-gray-700 rounded-xl text-gray-400 hover:text-blue-400 hover:border-blue-500/30 hover:bg-blue-500/5 transition-all flex justify-center items-center font-medium text-sm"
                                 >
                                     <Plus size={16} className="mr-2" />
-                                    <span>Add Variant</span>
+                                    <span>{t('addVariant')}</span>
                                 </button>
                             </div>
 
@@ -193,7 +193,7 @@ export default function ABTest() {
                                     onClick={() => setShowCreate(false)}
                                     className="px-6 py-2.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-xl transition-colors font-medium"
                                 >
-                                    {t('cancel') || "Cancel"}
+                                    {t('cancel')}
                                 </button>
                                 <button
                                     type="submit"
@@ -201,7 +201,7 @@ export default function ABTest() {
                                     className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-8 py-2.5 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 flex items-center transition-all disabled:opacity-50 font-bold"
                                 >
                                     {loading ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
-                                    {t('create') || "Create Test"}
+                                    {t('create')}
                                 </button>
                             </div>
                         </form>
@@ -215,13 +215,13 @@ export default function ABTest() {
                         <div className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mb-4">
                             <FlaskConical size={40} className="text-gray-600" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-300 mb-2">No A/B Tests Found</h3>
-                        <p className="text-gray-500 max-w-md mx-auto mb-6">Create your first A/B test to optimize your messaging strategy and improve conversion rates.</p>
+                        <h3 className="text-xl font-bold text-gray-300 mb-2">{t('noTestsFound')}</h3>
+                        <p className="text-gray-500 max-w-md mx-auto mb-6">{t('createFirstTest')}</p>
                         <button
                             onClick={() => setShowCreate(true)}
                             className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2.5 rounded-xl transition-colors border border-gray-600 font-medium"
                         >
-                            Create First Test
+                            {t('createFirstTestBtn')}
                         </button>
                     </div>
                 )}
@@ -258,7 +258,7 @@ export default function ABTest() {
                                         </span>
                                         <div className="flex items-center space-x-3">
                                             <span className="text-gray-500 text-xs bg-gray-800 px-2 py-1 rounded-md border border-gray-700">{v.weight}%</span>
-                                            <span className="font-mono text-blue-400 text-xs">{v.sent_count || 0} sent</span>
+                                            <span className="font-mono text-blue-400 text-xs">{v.sent_count || 0} {t('sentCount')}</span>
                                         </div>
                                     </div>
                                 );
@@ -271,7 +271,7 @@ export default function ABTest() {
                                 {new Date(test.created_at).toLocaleDateString()}
                             </span>
                             <button className="text-blue-400 hover:text-blue-300 transition-colors font-medium flex items-center">
-                                View Report <BarChart2 size={14} className="ml-1" />
+                                {t('viewReport')} <BarChart2 size={14} className="ml-1" />
                             </button>
                         </div>
                     </div>
@@ -283,9 +283,9 @@ export default function ABTest() {
                 isOpen={!!deleteModal}
                 onClose={() => setDeleteModal(null)}
                 onConfirm={handleDelete}
-                title="Delete A/B Test"
-                message="Are you sure you want to delete this A/B test? This action cannot be undone."
-                confirmText="Delete"
+                title={t('deleteTestTitle')}
+                message={t('deleteTestConfirm')}
+                confirmText={t('delete')}
                 isDestructive={true}
             />
 

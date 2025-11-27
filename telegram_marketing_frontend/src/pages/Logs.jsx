@@ -62,9 +62,9 @@ export default function Logs() {
             <div className="flex justify-between items-center mb-10">
                 <div>
                     <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 tracking-tight">
-                        {t('campaignLogs') || "Campaign Logs"}
+                        {t('campaignLogs')}
                     </h2>
-                    <p className="text-gray-400 mt-2 text-lg">Monitor delivery status and errors</p>
+                    <p className="text-gray-400 mt-2 text-lg">{t('logsDescription')}</p>
                 </div>
                 <div className="flex space-x-3">
                     <button
@@ -89,7 +89,7 @@ export default function Logs() {
                 <div className="relative flex-1 group">
                     <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={20} />
                     <input
-                        placeholder="Search recipient or error..."
+                        placeholder={t('searchPlaceholder')}
                         className="w-full bg-gray-800/40 border border-gray-700/50 rounded-xl pl-12 pr-4 py-3.5 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all placeholder-gray-600 backdrop-blur-sm"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -98,28 +98,28 @@ export default function Logs() {
                 <div className="min-w-[240px]">
                     <CustomDropdown
                         options={[
-                            { value: '', label: t('allStatuses') || 'All Statuses' },
-                            { value: 'success', label: t('success') || 'Success' },
-                            { value: 'failed', label: t('failed') || 'Failed' },
-                            { value: 'pending', label: t('pending') || 'Pending' }
+                            { value: '', label: t('allStatuses') },
+                            { value: 'success', label: t('success') },
+                            { value: 'failed', label: t('failed') },
+                            { value: 'pending', label: t('pending') }
                         ]}
                         value={statusFilter}
                         onChange={setStatusFilter}
                         icon={Filter}
-                        placeholder={t('allStatuses') || "All Statuses"}
+                        placeholder={t('allStatuses')}
                     />
                 </div>
             </div>
-
             <div className="bg-gray-800/40 backdrop-blur-xl border border-gray-700/50 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[calc(100vh-300px)]">
                 <div className="overflow-auto custom-scrollbar flex-1">
                     <table className="w-full text-left">
                         <thead className="bg-gray-900/80 backdrop-blur-md sticky top-0 z-10">
                             <tr>
-                                <th className="px-6 py-4 font-semibold text-gray-300 border-b border-gray-700/50">{t('time')}</th>
-                                <th className="px-6 py-4 font-semibold text-gray-300 border-b border-gray-700/50">{t('campaignStatus')}</th>
-                                <th className="px-6 py-4 font-semibold text-gray-300 border-b border-gray-700/50">{t('recipient')}</th>
-                                <th className="px-6 py-4 font-semibold text-gray-300 border-b border-gray-700/50">{t('error')}</th>
+                                <th className="px-6 py-4 font-semibold text-gray-300 border-b border-gray-700/50 whitespace-nowrap">{t('time')}</th>
+                                <th className="px-6 py-4 font-semibold text-gray-300 border-b border-gray-700/50 whitespace-nowrap">{t('campaignStatus')}</th>
+                                <th className="px-6 py-4 font-semibold text-gray-300 border-b border-gray-700/50 whitespace-nowrap">{t('recipient')}</th>
+                                <th className="px-6 py-4 font-semibold text-gray-300 border-b border-gray-700/50 whitespace-nowrap">{t('status')}</th>
+                                <th className="px-6 py-4 font-semibold text-gray-300 border-b border-gray-700/50 w-full whitespace-nowrap">{t('error')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-700/30">
@@ -128,8 +128,8 @@ export default function Logs() {
                                     <td colSpan="5" className="px-6 py-20 text-center text-gray-500">
                                         <div className="flex flex-col items-center justify-center">
                                             <FileText size={48} className="mb-4 opacity-20" />
-                                            <p className="text-lg font-medium">No logs found</p>
-                                            <p className="text-sm mt-1 opacity-60">Try adjusting your filters</p>
+                                            <p className="text-lg font-medium">{t('noLogsFound')}</p>
+                                            <p className="text-sm mt-1 opacity-60">{t('adjustFilters')}</p>
                                         </div>
                                     </td>
                                 </tr>

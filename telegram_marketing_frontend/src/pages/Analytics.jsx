@@ -15,7 +15,7 @@ import {
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
-import { Activity, CheckCircle, XCircle, AlertTriangle, Send, BarChart2, TrendingUp, Clock } from 'lucide-react';
+import { Activity, CheckCircle, XCircle, AlertTriangle, Send, BarChart2, TrendingUp, Clock, Users, Database, Search } from 'lucide-react';
 
 ChartJS.register(
     CategoryScale,
@@ -35,19 +35,25 @@ export default function Analytics() {
     const [dailyData, setDailyData] = useState(null);
     const [statusData, setStatusData] = useState(null);
     const [hourlyData, setHourlyData] = useState(null);
+    const [scrapingData, setScrapingData] = useState(null);
+    const [scrapingHourlyData, setScrapingHourlyData] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [dailyRes, statusRes, hourlyRes] = await Promise.all([
+                const [dailyRes, statusRes, hourlyRes, scrapingRes, scrapingHourlyRes] = await Promise.all([
                     axios.get('http://localhost:8000/analytics/daily'),
                     axios.get('http://localhost:8000/analytics/status-distribution'),
-                    axios.get('http://localhost:8000/analytics/hourly-activity')
+                    axios.get('http://localhost:8000/analytics/hourly-activity'),
+                    axios.get('http://localhost:8000/analytics/scraping'),
+                    axios.get('http://localhost:8000/analytics/hourly-scraping-activity')
                 ]);
 
                 setDailyData(dailyRes.data);
                 setStatusData(statusRes.data);
                 setHourlyData(hourlyRes.data);
+                setScrapingData(scrapingRes.data);
+                setScrapingHourlyData(scrapingHourlyRes.data);
             } catch (err) {
                 console.error("Failed to fetch analytics", err);
             }
@@ -134,6 +140,24 @@ export default function Analytics() {
         ],
     };
 
+    const scrapingBarChartData = {
+        labels: scrapingHourlyData?.map(d => d.hour) || [],
+        datasets: [
+            {
+                label: t('usersScrapedPerHour') || "Users Scraped per Hour",
+                data: scrapingHourlyData?.map(d => d.count) || [],
+                backgroundColor: (context) => {
+                    const ctx = context.chart.ctx;
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                    gradient.addColorStop(0, 'rgba(236, 72, 153, 0.8)'); // Pink-500
+                    gradient.addColorStop(1, 'rgba(244, 63, 94, 0.8)'); // Rose-500
+                    return gradient;
+                },
+                borderRadius: 4,
+            },
+        ],
+    };
+
     const options = {
         responsive: true,
         plugins: {
@@ -193,33 +217,81 @@ export default function Analytics() {
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <SummaryCard
-                    title="Total Processed"
+                    title={t('totalProcessed')}
                     value={totalSent}
                     icon={<Activity size={24} className="text-blue-400" />}
                     gradient="from-blue-500/20 to-blue-600/5"
                     borderColor="border-blue-500/30"
                 />
                 <SummaryCard
-                    title="Successfully Sent"
+                    title={t('successfullySent')}
                     value={statusData?.sent || 0}
                     icon={<CheckCircle size={24} className="text-green-400" />}
                     gradient="from-green-500/20 to-green-600/5"
                     borderColor="border-green-500/30"
                 />
                 <SummaryCard
-                    title="Failed"
+                    title={t('failed')}
                     value={statusData?.failed || 0}
                     icon={<XCircle size={24} className="text-red-400" />}
                     gradient="from-red-500/20 to-red-600/5"
                     borderColor="border-red-500/30"
                 />
                 <SummaryCard
-                    title="Success Rate"
+                    title={t('successRate')}
                     value={`${successRate}%`}
                     icon={<TrendingUp size={24} className="text-purple-400" />}
                     gradient="from-purple-500/20 to-purple-600/5"
                     borderColor="border-purple-500/30"
                 />
+            </div>
+            
+            {/* Scraping Stats */}
+            <h2 className="text-2xl font-bold text-gray-200 flex items-center mt-10">
+                <Search className="mr-3 text-purple-400" />
+                {t('scrapingStats')}
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <SummaryCard
+                    title={t('channelsScraped')}
+                    value={scrapingData?.total_channels_scraped || 0}
+                    icon={<Database size={24} className="text-indigo-400" />}
+                    gradient="from-indigo-500/20 to-indigo-600/5"
+                    borderColor="border-indigo-500/30"
+                />
+                <SummaryCard
+                    title={t('usersScraped')}
+                    value={scrapingData?.total_users_scraped || 0}
+                    icon={<Users size={24} className="text-pink-400" />}
+                    gradient="from-pink-500/20 to-pink-600/5"
+                    borderColor="border-pink-500/30"
+                />
+                 <div className="bg-gray-800/40 backdrop-blur-xl p-6 rounded-2xl border border-gray-700/50 shadow-xl hover:shadow-2xl transition-shadow duration-300 flex flex-col">
+                    <h3 className="text-lg font-semibold text-gray-200 mb-4 flex items-center">
+                        <Clock className="mr-2 text-gray-400" size={18} />
+                        {t('recentScrapes')}
+                    </h3>
+                    <div className="flex-1 overflow-auto custom-scrollbar">
+                        {scrapingData?.recent_activity?.length > 0 ? (
+                            <ul className="space-y-3">
+                                {scrapingData.recent_activity.map((log, i) => (
+                                    <li key={i} className="flex justify-between items-center text-sm border-b border-gray-700/30 pb-2 last:border-0">
+                                        <div className="flex flex-col">
+                                            <span className="text-blue-400 font-medium truncate max-w-[150px]" title={log.source}>{log.source}</span>
+                                            <span className="text-gray-500 text-xs">{log.date}</span>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <span className="text-gray-200 font-bold mr-2">+{log.count}</span>
+                                            <span className={`w-2 h-2 rounded-full ${log.status === 'success' ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-gray-500 text-sm text-center mt-4">{t('noData')}</p>
+                        )}
+                    </div>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -247,7 +319,7 @@ export default function Analytics() {
                         {/* Center Text */}
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                             <span className="text-3xl font-bold text-gray-100">{statusData?.sent || 0}</span>
-                            <span className="text-xs text-gray-500 uppercase tracking-wider">Sent</span>
+                            <span className="text-xs text-gray-500 uppercase tracking-wider">{t('sent')}</span>
                         </div>
                     </div>
                 </div>
@@ -260,6 +332,17 @@ export default function Analytics() {
                     </h3>
                     <div className="h-[250px]">
                         <Bar options={{ ...options, maintainAspectRatio: false }} data={barChartData} />
+                    </div>
+                </div>
+
+                {/* Hourly Scraping Activity Bar Chart */}
+                <div className="lg:col-span-3 bg-gray-800/40 backdrop-blur-xl p-6 rounded-2xl border border-gray-700/50 shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    <h3 className="text-lg font-semibold text-gray-200 mb-6 flex items-center">
+                        <Search className="mr-2 text-pink-400" size={20} />
+                        {t('hourlyScrapingActivity') || "Hourly Scraping Activity"}
+                    </h3>
+                    <div className="h-[250px]">
+                        <Bar options={{ ...options, maintainAspectRatio: false }} data={scrapingBarChartData} />
                     </div>
                 </div>
             </div>

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 import time
 from ..database import get_db
-from ..models import Account
+from ..models import Account, ScraperLog
 from ..services.scraper import scrape_group_members
 from telethon import TelegramClient
 from telethon.sessions import StringSession
@@ -48,13 +48,41 @@ async def scrape_group(request: ScrapeRequest, db: AsyncSession = Depends(get_db
         duration = end_time - start_time
         
         await client.disconnect()
+
+        # Log success
+        log_entry = ScraperLog(
+            source_url=request.group_link,
+            users_scraped=len(members),
+            status="success"
+        )
+        db.add(log_entry)
+        await db.commit()
+
         return {"count": len(members), "members": members, "duration": duration}
         
     except ValueError as e:
         logging.error(f"Scrape failed (Value Error): {e}")
+        # Log failure
+        log_entry = ScraperLog(
+            source_url=request.group_link,
+            users_scraped=0,
+            status="failed",
+            error_message=str(e)
+        )
+        db.add(log_entry)
+        await db.commit()
         raise HTTPException(status_code=404, detail="Group not found. Please check the link and ensure it is public.")
     except Exception as e:
         logging.error(f"Scrape failed: {e}")
+        # Log failure
+        log_entry = ScraperLog(
+            source_url=request.group_link,
+            users_scraped=0,
+            status="failed",
+            error_message=str(e)
+        )
+        db.add(log_entry)
+        await db.commit()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/dialogs/{account_id}")

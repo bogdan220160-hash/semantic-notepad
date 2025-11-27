@@ -95,6 +95,8 @@ export default function DripCampaigns() {
                 await axios.post(`http://localhost:8000/drip/${confirmModal.id}/start`);
             } else if (confirmModal.type === 'pause') {
                 await axios.post(`http://localhost:8000/drip/${confirmModal.id}/pause`);
+            } else if (confirmModal.type === 'delete') {
+                await axios.delete(`http://localhost:8000/drip/${confirmModal.id}`);
             }
             fetchCampaigns();
         } catch (err) {
@@ -109,9 +111,9 @@ export default function DripCampaigns() {
             <div className="flex justify-between items-center mb-10">
                 <div>
                     <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 tracking-tight">
-                        Drip Campaigns
+                        {t('dripCampaigns')}
                     </h2>
-                    <p className="text-gray-400 mt-2 text-lg">Automate your customer journey sequences</p>
+                    <p className="text-gray-400 mt-2 text-lg">{t('dripDescription')}</p>
                 </div>
                 <button
                     onClick={() => { setIsCreating(!isCreating); setError(null); }}
@@ -119,7 +121,7 @@ export default function DripCampaigns() {
                 >
                     <div className="flex items-center space-x-2 relative z-10">
                         {isCreating ? <X size={20} /> : <Plus size={20} />}
-                        <span className="font-semibold">{isCreating ? "Cancel" : "New Campaign"}</span>
+                        <span className="font-semibold">{isCreating ? t('cancel') : t('newCampaign')}</span>
                     </div>
                 </button>
             </div>
@@ -143,12 +145,12 @@ export default function DripCampaigns() {
                     
                     <h3 className="text-2xl font-bold text-gray-100 mb-8 flex items-center">
                         <span className="bg-blue-500/20 p-2 rounded-lg mr-3 text-blue-400"><Plus size={24} /></span>
-                        Create Drip Sequence
+                        {t('createDripSequence')}
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">Campaign Name</label>
+                            <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">{t('campaignName')}</label>
                             <input
                                 type="text"
                                 placeholder="e.g. Onboarding Sequence"
@@ -161,22 +163,22 @@ export default function DripCampaigns() {
 
                         <div>
                             <CustomDropdown
-                                label="Target List"
+                                label={t('targetList')}
                                 options={lists.map(l => ({ value: l.id, label: l.name }))}
                                 value={newCampaign.list_id}
                                 onChange={val => setNewCampaign({ ...newCampaign, list_id: val })}
-                                placeholder="Select List"
+                                placeholder={t('selectList')}
                             />
                         </div>
                         </div>
                         <div>
                         <div>
                             <CustomDropdown
-                                label="Sending Account"
+                                label={t('sendingAccounts')}
                                 options={accounts.map(a => ({ value: a.id, label: a.phone_number }))}
                                 value={newCampaign.account_id}
                                 onChange={val => setNewCampaign({ ...newCampaign, account_id: val })}
-                                placeholder="Select Account"
+                                placeholder={t('selectAccount') || "Select Account"}
                             />
                         </div>
                         </div>
@@ -185,7 +187,7 @@ export default function DripCampaigns() {
                     <div className="mb-8 bg-gray-900/30 rounded-2xl p-6 border border-gray-700/30">
                         <h4 className="text-lg font-semibold text-gray-200 mb-5 flex items-center">
                             <Clock className="mr-2 text-purple-400" size={20} />
-                            Sequence Steps
+                            {t('sequenceSteps')}
                         </h4>
                         
                         {newCampaign.steps.length > 0 ? (
@@ -204,7 +206,7 @@ export default function DripCampaigns() {
                                             </div>
                                             <div className="text-sm text-gray-400 flex items-center mt-1">
                                                 <Clock size={14} className="mr-1.5 text-purple-400" />
-                                                Wait <span className="text-gray-200 font-mono mx-1.5 bg-gray-700 px-1.5 rounded">{step.delay_minutes}</span> minutes after previous step
+                                                {t('wait')} <span className="text-gray-200 font-mono mx-1.5 bg-gray-700 px-1.5 rounded">{step.delay_minutes}</span> {t('minutesAfter')}
                                             </div>
                                         </div>
                                         <button
@@ -222,22 +224,22 @@ export default function DripCampaigns() {
                             </div>
                         ) : (
                             <div className="text-center py-10 border-2 border-dashed border-gray-700/50 rounded-xl mb-6 text-gray-500">
-                                <p>No steps added yet. Add your first message below.</p>
+                                <p>{t('noSteps')}</p>
                             </div>
                         )}
 
                         <div className="flex flex-col md:flex-row items-end gap-4 p-5 bg-gray-800/50 rounded-xl border border-gray-700/50">
                             <div className="flex-1 w-full">
                                 <CustomDropdown
-                                    label="Message Template"
+                                    label={t('messageTemplates')}
                                     options={templates.map(t => ({ value: t.id, label: t.name }))}
                                     value={newStep.template_id}
                                     onChange={val => setNewStep({ ...newStep, template_id: val })}
-                                    placeholder="Select Template"
+                                    placeholder={t('selectTemplate')}
                                 />
                             </div>
                             <div className="w-full md:w-48">
-                                <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1 uppercase tracking-wider">Delay (minutes)</label>
+                                <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1 uppercase tracking-wider">{t('delaySeconds').replace('seconds', 'minutes')}</label>
                                 <input
                                     type="number"
                                     min="0"
@@ -252,7 +254,7 @@ export default function DripCampaigns() {
                                 className="w-full md:w-auto bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center"
                             >
                                 <Plus size={18} className="mr-2" />
-                                Add Step
+                                {t('addStep')}
                             </button>
                         </div>
                     </div>
@@ -264,7 +266,7 @@ export default function DripCampaigns() {
                             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 px-10 rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                         >
                             {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : null}
-                            {loading ? "Creating..." : "Create Campaign"}
+                            {loading ? t('processing') : t('create')}
                         </button>
                     </div>
                 </div>
@@ -294,7 +296,7 @@ export default function DripCampaigns() {
                                     <button
                                         onClick={() => setConfirmModal({ type: 'start', id: campaign.id })}
                                         className="p-2.5 bg-green-500/10 text-green-400 hover:bg-green-500/20 rounded-xl transition-colors border border-green-500/20"
-                                        title="Start Campaign"
+                                        title={t('startCampaign')}
                                     >
                                         <Play size={20} fill="currentColor" className="opacity-80" />
                                     </button>
@@ -303,23 +305,30 @@ export default function DripCampaigns() {
                                     <button
                                         onClick={() => setConfirmModal({ type: 'pause', id: campaign.id })}
                                         className="p-2.5 bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 rounded-xl transition-colors border border-yellow-500/20"
-                                        title="Pause Campaign"
+                                        title={t('stop')}
                                     >
                                         <Pause size={20} fill="currentColor" className="opacity-80" />
                                     </button>
                                 )}
+                                <button
+                                    onClick={() => setConfirmModal({ type: 'delete', id: campaign.id })}
+                                    className="p-2.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-xl transition-colors border border-red-500/20"
+                                    title={t('delete')}
+                                >
+                                    <Trash2 size={20} className="opacity-80" />
+                                </button>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mb-6">
                             <div className="bg-gray-900/40 p-3 rounded-xl border border-gray-700/30">
-                                <span className="text-xs text-gray-500 block mb-1 uppercase tracking-wider">Target List</span>
+                                <span className="text-xs text-gray-500 block mb-1 uppercase tracking-wider">{t('targetList')}</span>
                                 <span className="text-gray-200 font-medium truncate block" title={lists.find(l => l.id === campaign.list_id)?.name}>
                                     {lists.find(l => l.id === campaign.list_id)?.name || campaign.list_id}
                                 </span>
                             </div>
                             <div className="bg-gray-900/40 p-3 rounded-xl border border-gray-700/30">
-                                <span className="text-xs text-gray-500 block mb-1 uppercase tracking-wider">Sender</span>
+                                <span className="text-xs text-gray-500 block mb-1 uppercase tracking-wider">{t('sender')}</span>
                                 <span className="text-gray-200 font-medium truncate block" title={accounts.find(a => a.id === campaign.account_id)?.phone_number}>
                                     {accounts.find(a => a.id === campaign.account_id)?.phone_number || campaign.account_id}
                                 </span>
@@ -328,7 +337,7 @@ export default function DripCampaigns() {
 
                         <div className="border-t border-gray-700/50 pt-5">
                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center justify-between">
-                                <span>Sequence Steps</span>
+                                <span>{t('sequenceSteps')}</span>
                                 <span className="bg-gray-700 px-2 py-0.5 rounded-full text-gray-300">{campaign.steps.length}</span>
                             </h4>
                             <div className="space-y-3 relative">
@@ -342,7 +351,7 @@ export default function DripCampaigns() {
                                         </div>
                                         <div className="flex-1 bg-gray-900/30 px-3 py-2 rounded-lg border border-gray-700/30 flex justify-between items-center">
                                             <span className="text-gray-300 truncate mr-2">
-                                                Template #{step.template_id}
+                                                {templates.find(t => t.id == step.template_id)?.name || `Template #${step.template_id}`}
                                             </span>
                                             <span className="text-xs text-gray-500 bg-gray-800 px-1.5 py-0.5 rounded border border-gray-700">
                                                 +{step.delay_minutes}m
@@ -360,12 +369,12 @@ export default function DripCampaigns() {
                 isOpen={!!confirmModal}
                 onClose={() => setConfirmModal(null)}
                 onConfirm={handleConfirmAction}
-                title={confirmModal?.type === 'start' ? "Start Campaign" : "Pause Campaign"}
-                message={confirmModal?.type === 'start' 
-                    ? "Are you sure you want to start this drip campaign? Users will be enrolled immediately." 
-                    : "Are you sure you want to pause this campaign? No new messages will be sent."}
-                confirmText={confirmModal?.type === 'start' ? "Start Campaign" : "Pause Campaign"}
-                isDestructive={false}
+                title={confirmModal?.type === 'delete' ? t('deleteCampaign') : (confirmModal?.type === 'start' ? t('startCampaign') : t('stop'))}
+                message={confirmModal?.type === 'delete' 
+                    ? t('deleteDripConfirm') 
+                    : (confirmModal?.type === 'start' ? t('startDripConfirm') : t('pauseDripConfirm'))}
+                confirmText={confirmModal?.type === 'delete' ? t('delete') : (confirmModal?.type === 'start' ? t('startCampaign') : t('stop'))}
+                isDestructive={confirmModal?.type === 'delete'}
             />
         </div>
     );

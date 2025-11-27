@@ -164,3 +164,18 @@ async def get_drip_stats(id: int, db: AsyncSession = Depends(get_db)):
     )
     stats = {row[0]: row[1] for row in result.all()}
     return stats
+
+@router.delete("/{id}")
+async def delete_drip_campaign(id: int, db: AsyncSession = Depends(get_db)):
+    # Check if exists
+    result = await db.execute(select(DripCampaign).where(DripCampaign.id == id))
+    campaign = result.scalars().first()
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    
+    # Delete (cascade should handle steps and progress if configured in models, 
+    # but let's be safe and rely on SQLAlchemy cascade or manual delete if needed. 
+    # Assuming models have cascade="all, delete-orphan")
+    await db.delete(campaign)
+    await db.commit()
+    return {"status": "deleted", "id": id}

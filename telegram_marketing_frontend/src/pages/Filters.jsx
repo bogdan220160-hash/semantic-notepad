@@ -50,7 +50,7 @@ export default function Filters() {
                         <div className="mb-8 p-4 bg-blue-900/20 text-blue-200 border border-blue-700/50 rounded-xl flex items-start space-x-3">
                             <Shield className="flex-shrink-0 text-blue-400" size={24} />
                             <div>
-                                <h3 className="font-semibold text-blue-100 mb-1">Smart Filtering</h3>
+                                <h3 className="font-semibold text-blue-100 mb-1">{t('smartFiltering')}</h3>
                                 <p className="text-sm text-blue-200/80 leading-relaxed">{t('filtersDescription')}</p>
                             </div>
                         </div>
@@ -124,25 +124,25 @@ export default function Filters() {
                 {/* Info Panel */}
                 <div className="lg:col-span-1">
                     <div className="bg-gray-800/30 backdrop-blur-sm p-6 rounded-2xl border border-gray-700/30 sticky top-6">
-                        <h3 className="text-lg font-semibold text-gray-200 mb-4">Why use filters?</h3>
+                        <h3 className="text-lg font-semibold text-gray-200 mb-4">{t('whyUseFilters')}</h3>
                         <ul className="space-y-4 text-sm text-gray-400">
                             <li className="flex items-start">
                                 <div className="bg-green-500/10 p-1 rounded mr-3 mt-0.5">
                                     <CheckCircle size={14} className="text-green-400" />
                                 </div>
-                                <span><strong>Improve Efficiency:</strong> Don't waste resources sending messages to bots or inactive accounts.</span>
+                                <span><strong>{t('improveEfficiency')}:</strong> {t('improveEfficiencyDesc')}</span>
                             </li>
                             <li className="flex items-start">
                                 <div className="bg-green-500/10 p-1 rounded mr-3 mt-0.5">
                                     <CheckCircle size={14} className="text-green-400" />
                                 </div>
-                                <span><strong>Higher Conversion:</strong> Real users with profile photos are more likely to engage.</span>
+                                <span><strong>{t('higherConversion')}:</strong> {t('higherConversionDesc')}</span>
                             </li>
                             <li className="flex items-start">
                                 <div className="bg-green-500/10 p-1 rounded mr-3 mt-0.5">
                                     <CheckCircle size={14} className="text-green-400" />
                                 </div>
-                                <span><strong>Safety:</strong> Filtering suspicious accounts can help protect your sender reputation.</span>
+                                <span><strong>{t('safety')}:</strong> {t('safetyDesc')}</span>
                             </li>
                         </ul>
                     </div>
@@ -159,7 +159,7 @@ export default function Filters() {
                             </div>
 
                             <h3 className="text-xl font-bold text-white">
-                                {showModal.type === 'success' ? 'Success!' : 'Error'}
+                                {showModal.type === 'success' ? t('success') : t('error')}
                             </h3>
 
                             <p className="text-gray-300">
@@ -170,7 +170,7 @@ export default function Filters() {
                                 onClick={() => setShowModal(null)}
                                 className="mt-4 w-full bg-gray-800 hover:bg-gray-700 text-white font-medium py-2.5 rounded-xl transition-colors border border-gray-700"
                             >
-                                Close
+                                {t('close')}
                             </button>
                         </div>
                     </div>

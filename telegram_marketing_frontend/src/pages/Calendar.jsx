@@ -229,9 +229,12 @@ export default function Calendar() {
                                         <div className="flex items-center space-x-2">
                                             <Clock size={14} className="text-blue-400" />
                                             <span className="font-mono text-gray-300">
-                                                {c.scheduled_for
-                                                    ? new Date(c.scheduled_for).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                                                    : new Date(c.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                                {(() => {
+                                                    const dateStr = c.scheduled_for || c.created_at;
+                                                    if (!dateStr) return '';
+                                                    const date = new Date(dateStr.endsWith('Z') ? dateStr : dateStr + 'Z');
+                                                    return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                                                })()}
                                             </span>
                                         </div>
                                         <div className="flex items-center space-x-2">
